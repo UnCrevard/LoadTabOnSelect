@@ -1,22 +1,23 @@
 {
-  "name": "LoadTabOnSelect",
-  "version": "1.0.0",
-  "description": "**Version 1.2  | September 5 2017**",
+  "name": "loadtabonselect-evolution",
+  "version": "0.0.0",
+  "description": "Silent backgrounded tabs",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "web-ext -s dist/ lint",
+    "build":"web-ext -s dist/ build"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/UnCrevard/LoadTabOnSelect.git"
+    "url": "git+https://github.com/UnCrevard/LoadTabOnSelect-Evolution.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/UnCrevard/LoadTabOnSelect/issues"
+    "url": "https://github.com/UnCrevard/LoadTabOnSelect-Evolution/issues"
   },
-  "homepage": "https://github.com/UnCrevard/LoadTabOnSelect#readme",
+  "homepage": "https://github.com/UnCrevard/LoadTabOnSelect-Evolution#readme",
   "dependencies": {
     "@types/chrome": "0.0.63"
   }

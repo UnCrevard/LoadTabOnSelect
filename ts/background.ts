@@ -4,7 +4,7 @@ const log = console.log;
 
 /*
 
-fore :
+fg :
 
 activated tabId:number windowId:number
 created tab
@@ -13,37 +13,9 @@ bg :
 
 */
 
-const tabs = {}
-
 /* Array used to temporarily store tab IDs. */
 
-const managedTabs = [];
-
-/* Function to redirect a selected tab to its actual url. */
-
-function handleActivated(activeInfo: chrome.tabs.TabActiveInfo) {
-
-
-	if (activeInfo.tabId in tabs) {
-		log("activated", activeInfo)
-		log(tabs[activeInfo.tabId].url)
-	}
-
-	/*
-		chrome.tabs.get(activeInfo.tabId,tab=>
-		{
-			if (tab.url.startsWith(chrome.extension.getURL("/html/tab.html?managedUrl=")))
-			{
-				chrome.tabs.update(activeInfo.tabId,
-				{
-					url: tab.url.split("/html/tab.html?managedUrl=")[1]
-				});
-			}
-		}).then(function() {
-			managedTabs.splice(managedTabs.indexOf(activeInfo.tabId), 1);
-		});
-	*/
-}
+const tabs = {}
 
 /* Function to store a newly-created tab's id to the managedTabs array. */
 
@@ -68,12 +40,11 @@ url:"about:newtab"
 */
 chrome.tabs.onCreated.addListener(tab => {
 
-	/* bg ? */
+	/* backgrounded tab ? */
 	if (!tab.active) {
 		log("created", tab)
 
 		tabs[tab.id] = tab
-		managedTabs.push(tab.id);
 	}
 });
 
@@ -102,6 +73,7 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tabInfo) => {
 			case "moz-extension":
 			case "chrome-extension":
 			case "about":
+			case "file": // web extension can't manipulate this protocol
 				break;
 			default:
 				chrome.tabs.update(tabId,
@@ -111,18 +83,8 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tabInfo) => {
 		}
 	}
 
-	/*
-		if (changeInfo.url !== undefined
-			&& managedTabs.includes(tabId)
-			&& !changeInfo.url.startsWith("moz-extension://")
-			&& !changeInfo.url.startsWith("about:")) {
-			chrome.tabs.update(tabId, {
-				url: "html/tab.html?managedUrl=" + changeInfo.url
-			});
-		}
-	*/
 });
-chrome.tabs.onActivated.addListener(handleActivated);
+
 chrome.tabs.onRemoved.addListener((tabId, removeInfo) => {
 	/*
 

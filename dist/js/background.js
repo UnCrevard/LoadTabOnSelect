@@ -1,18 +1,10 @@
 console.clear();
 const log = console.log;
 const tabs = {};
-const managedTabs = [];
-function handleActivated(activeInfo) {
-    if (activeInfo.tabId in tabs) {
-        log("activated", activeInfo);
-        log(tabs[activeInfo.tabId].url);
-    }
-}
 chrome.tabs.onCreated.addListener(tab => {
     if (!tab.active) {
         log("created", tab);
         tabs[tab.id] = tab;
-        managedTabs.push(tab.id);
     }
 });
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tabInfo) => {
@@ -24,6 +16,7 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tabInfo) => {
             case "moz-extension":
             case "chrome-extension":
             case "about":
+            case "file":
                 break;
             default:
                 chrome.tabs.update(tabId, {
@@ -32,7 +25,6 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tabInfo) => {
         }
     }
 });
-chrome.tabs.onActivated.addListener(handleActivated);
 chrome.tabs.onRemoved.addListener((tabId, removeInfo) => {
     if (tabId in tabs) {
         delete tabs[tabId];
