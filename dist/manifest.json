@@ -2,7 +2,7 @@
 	"background": {
 		"scripts": ["/js/background.js"]
 	},
-	"description": "Load new tabs on selection.",
+	"description": "Load backgrouned tabs on selection.",
 	"icons": {
 		"48": "/img/icon.png",
 		"96": "/img/icon@2x.png"
@@ -11,6 +11,6 @@
 		"tabs"
 	],
 	"manifest_version": 2,
-	"name": "LoadTabOnSelect",
-	"version": "1.2"
+	"name": "LoadTabOnSelect Evolution",
+	"version": "1.0"
 }

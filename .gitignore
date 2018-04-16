@@ -1,0 +1,8 @@
+/node_modules/
+
+.vscode/
+
+*.sublime-*
+
+thumbs.db
+desktop.ini
