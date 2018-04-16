@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "web-ext -s dist/ lint",
-    "build":"web-ext -s dist/ build"
+    "build":"web-ext -s dist/ build --overwrite-dest"
   },
   "repository": {
     "type": "git",
