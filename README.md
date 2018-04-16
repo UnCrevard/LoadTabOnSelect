@@ -1,6 +1,14 @@
 ## LoadTabOnSelect Evolution
 
-**Version 1.0 | 20180416 Forked from the original https://addons.mozilla.org/en-US/firefox/addon/loadtabonselect/ **
+**20180416 Version 1.1**
+
+add : ignoring file:// to respect web extension policy
+
+**20180416 Version 1.0**
+
+Forked from the original https://addons.mozilla.org/en-US/firefox/addon/loadtabonselect/
+
+#### Description
 
 LoadTabOnSelect prevents new tabs from automatically loading, instead loading them on selection.
 
