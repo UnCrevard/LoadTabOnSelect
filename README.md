@@ -1,5 +1,9 @@
 ## LoadTabOnSelect Evolution
 
+**20180418 Version 1.2**
+
+fix : forget decodeURI (google search was broken)
+
 **20180416 Version 1.1**
 
 add : ignoring file:// to respect web extension policy
@@ -26,6 +30,6 @@ The only required permission is `tabs`.
 
 #### Privacy
 
-LoadTabOnSelect does not collect any user data. 
+LoadTabOnSelect does not collect any user data.
 
 The extension is hosted entirely on GitHub, and Mozilla Add-ons (AMO). These services may independently collect user data.
