@@ -1,7 +1,5 @@
 let url = new URL(decodeURI(window.location.search.split("?url=")[1]))
 
-console.debug("Loaded in background", url.href)
-
 /*
 
 	remove tracking from google search @bonus
@@ -31,7 +29,11 @@ document.getElementById("favicon").setAttribute("href", favicon)
 
 document.title = url.href
 
-document.addEventListener("focus", e => {
+window.addEventListener("error", e => {
+	document.getElementById("app").innerText = e.message;
 
+})
+
+window.addEventListener("focus", e => {
 	window.location.replace(url.href)
 })

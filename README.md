@@ -1,5 +1,9 @@
 ## LoadTabOnSelect Evolution
 
+**20180526 version 1.4**
+
+listen for window focus to be chrome compatible and show an error on when a page fail to be redirected.
+
 **20180505 Version 1.3**
 
 add favicon to the tab (not always working btw, but google favicon api has privacy issues)<br>
