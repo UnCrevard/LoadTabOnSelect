@@ -34,4 +34,8 @@ declare namespace browser.tabs{
 
 declare namespace chrome.runtime{
 	function getBrowserInfo(...args:Array<any>):void
+
+	interface MessageSender{
+		extensionId:string
+	}
 }

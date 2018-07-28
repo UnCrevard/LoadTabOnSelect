@@ -1,6 +1,6 @@
 ## LoadTabOnSelect Evolution
 
-**20180728 version 1.5**
+**20180728 version 1.6**
 
 now backgrounded tabs network access is blocked (zero data loaded)<br>
 add an option to prefetch the main page (only html. No image, no script etc...) to get the title (may fail) and favicon (may fail also).

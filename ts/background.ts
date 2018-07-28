@@ -292,16 +292,16 @@ function onBeforeSendHeaders(details: chrome.webRequest.WebRequestHeadersDetails
 
 function onMessage(msg:any,sender:chrome.runtime.MessageSender,sendResponse:(response:any)=>void)
 {
-	// debug("onMessage", msg, sender)
+	if (sender.extensionId!= chrome.runtime.id) throw sender
 
-	if (sender.id!=chrome.runtime.id) throw sender
-
-	if (msg===null)
+	if (msg=="settings")
 	{
 		sendResponse(settings)
 	}
 	else
 	{
+		console.debug("update settings",settings)
+
 		settings=msg as Settings
 		storage.set(settings)
 	}

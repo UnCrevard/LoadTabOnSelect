@@ -9,7 +9,7 @@ function togglePrefetching(this: HTMLInputElement) {
 	chrome.runtime.sendMessage(settings)
 }
 
-chrome.runtime.sendMessage(null,res=>
+chrome.runtime.sendMessage("settings",res=>
 {
 	settings=res as Settings
 

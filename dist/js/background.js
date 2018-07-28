@@ -151,12 +151,13 @@ function onBeforeSendHeaders(details) {
     }
 }
 function onMessage(msg, sender, sendResponse) {
-    if (sender.id != chrome.runtime.id)
+    if (sender.extensionId != chrome.runtime.id)
         throw sender;
-    if (msg === null) {
+    if (msg == "settings") {
         sendResponse(settings);
     }
     else {
+        console.debug("update settings", settings);
         settings = msg;
         storage.set(settings);
     }

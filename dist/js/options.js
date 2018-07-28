@@ -4,7 +4,7 @@ function togglePrefetching() {
     settings.prefetching = this.checked;
     chrome.runtime.sendMessage(settings);
 }
-chrome.runtime.sendMessage(null, res => {
+chrome.runtime.sendMessage("settings", res => {
     settings = res;
     let checkbox = document.querySelector("input[id=tooglePrefetching]");
     checkbox.checked = settings.prefetching;
