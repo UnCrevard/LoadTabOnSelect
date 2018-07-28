@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "web-ext -s dist/ lint",
-    "build":"web-ext -s dist/ build --overwrite-dest"
+    "build": "web-ext -s dist/ build --overwrite-dest"
   },
   "repository": {
     "type": "git",
@@ -19,6 +19,9 @@
   },
   "homepage": "https://github.com/UnCrevard/LoadTabOnSelect-Evolution#readme",
   "dependencies": {
+  },
+  "devDependencies": {
+    "web-ext-types": "^2.1.0",
     "@types/chrome": "0.0.63"
   }
 }

@@ -1,16 +1,27 @@
 {
 	"background": {
-		"scripts": ["/js/background.js"]
+		"scripts": [
+			"/js/background.js"
+		]
 	},
 	"description": "Load backgrounded tabs on selection.",
 	"icons": {
 		"48": "/img/icon.png",
 		"96": "/img/icon@2x.png"
 	},
+	"options_ui": {
+		"page": "html/options.html"
+	},
 	"permissions": [
 		"tabs"
+		,"storage"
+		,"webRequest"
+		,"webRequestBlocking"
+		,"<all_urls>"
+	],
+	"web_accessible_resources": [
 	],
 	"manifest_version": 2,
 	"name": "LoadTabOnSelect Evolution",
-	"version": "1.4"
+	"version": "1.5"
 }
