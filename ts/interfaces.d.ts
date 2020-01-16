@@ -17,9 +17,11 @@ interface Settings
 	prefetching:boolean
 }
 
+/*
 interface HTMLLinkElementX extends HTMLLinkElement {
 	sizes?: Array<string>
 }
+*/
 
 /* fix */
 

@@ -1,3 +1,5 @@
+const DEBUG = false;
+const debug = console.debug;
 const error = console.error;
 let settings = {
     prefetching: true
@@ -7,31 +9,28 @@ const tabs = [];
 const isChrome = chrome.runtime.getURL("").split("-")[0] == "chrome";
 storage.get(null, (items) => {
     if (items) {
-        settings = Object.assign(settings, items);
+        Object.assign(settings, items);
+        DEBUG && debug("settings", settings);
     }
 });
 function onStartup() {
 }
-function onSuspend() {
-}
+function onSuspend() { }
 function onInstalled(details) {
-    chrome.runtime.openOptionsPage(error);
 }
-function onUpdateAvailable(details) {
-}
-function onRestartRequired(reason) {
-}
+function onUpdateAvailable(details) { }
+function onRestartRequired(reason) { }
 function onCreated(tab) {
+    DEBUG && debug("onCreated", tab);
     if (tab.active == false) {
-        tabs[tab.id] =
-            {
-                isSleeping: false,
-                title: null,
-                url: null,
-                id: tab.id,
-                faviconUrl: null,
-                stop: true
-            };
+        tabs[tab.id] = {
+            isSleeping: false,
+            title: null,
+            url: null,
+            id: tab.id,
+            faviconUrl: null,
+            stop: true
+        };
     }
 }
 function onUpdated(tabId, changeInfo, tabInfo) {
@@ -40,6 +39,7 @@ function onUpdated(tabId, changeInfo, tabInfo) {
         if (tab.isSleeping) {
         }
         else {
+            DEBUG && debug("onUpdated", changeInfo, tab);
             if (changeInfo.url && changeInfo.url != "about:blank")
                 tab.url = changeInfo.url;
             if (changeInfo.title)
@@ -48,8 +48,8 @@ function onUpdated(tabId, changeInfo, tabInfo) {
                 tab.faviconUrl = changeInfo.favIconUrl;
             if (changeInfo.status && changeInfo.status == "complete" && tab.url) {
                 tab.isSleeping = true;
-                tab.stop = false;
-                let protocol = new URL(tab.url).protocol;
+                let url = new URL(tab.url);
+                let protocol = url.protocol;
                 switch (protocol) {
                     case "file:":
                     case "moz-extension:":
@@ -60,17 +60,27 @@ function onUpdated(tabId, changeInfo, tabInfo) {
                         break;
                     case "http:":
                     case "https:":
-                        if (!settings.prefetching)
+                        if (url.hostname.match("^www.google.[a-z]+$")) {
+                            let realURL = url.searchParams.get("url");
+                            if (realURL) {
+                                tab.url = realURL;
+                            }
+                        }
+                        if (tab.title || !settings.prefetching)
                             return;
+                        tab.stop = false;
+                        DEBUG && debug("prefetching", tab);
                         fetch(tab.url, {
                             credentials: "include",
                             "cache": "force-cache"
                         })
                             .then(res => res.text())
                             .then(body => {
+                            tab.stop = true;
                             let html = new DOMParser().parseFromString(body, "text/html");
                             let titles = html.querySelectorAll("head title");
-                            tab.title = (titles) ? titles[0].textContent : tab.url;
+                            tab.title = titles.length ? titles[0].textContent : tab.url;
+                            DEBUG && debug("titles", titles);
                             let links = html.querySelectorAll("head link");
                             let icons = [];
                             icons.push({
@@ -86,12 +96,17 @@ function onUpdated(tabId, changeInfo, tabInfo) {
                                     });
                                 }
                             });
+                            DEBUG && debug("favicons", icons);
                             tab.faviconUrl = icons.sort((a, b) => b.size - a.size)[0].href;
                             chrome.tabs.update(tabId, {
                                 url: `html/tab.html?data=${encodeURIComponent(JSON.stringify(tab))}`
                             });
+                            tab.stop = false;
+                            DEBUG && debug(tab);
                         })
-                            .catch(error);
+                            .catch(err => {
+                            error(err);
+                        });
                         break;
                     default:
                         error(protocol, tab.url);
@@ -102,37 +117,38 @@ function onUpdated(tabId, changeInfo, tabInfo) {
 }
 function onActivated(activeInfo) {
     if (activeInfo.tabId in tabs) {
+        DEBUG && debug("onActivated", activeInfo);
         let tab = tabs[activeInfo.tabId];
         let url = tab.url;
         if (!url)
             throw "url is empty !!!";
         delete tabs[activeInfo.tabId];
-        let extract = new URL(url);
-        if (extract.hostname.match("^www.google.[a-z]+$")) {
-            let realURL = extract.searchParams.get("url");
-            if (realURL)
-                url = realURL;
-        }
         chrome.tabs.update({ url: url });
     }
 }
 function onRemoved(tabId, removeInfo) {
+    DEBUG && debug("onRemoved", tabId, removeInfo);
     if (tabId in tabs) {
         delete tabs[tabId];
     }
 }
 function onBeforeRequest(details) {
     if (details.tabId < 0) {
+        DEBUG && debug("addon bypass", details);
     }
     else if (details.tabId in tabs) {
         let tab = tabs[details.tabId];
         if (!tab.url)
             tab.url = details.url;
         if (tab.stop) {
+            DEBUG && debug("block", details);
             return { cancel: true };
         }
         else {
+            DEBUG && debug("allow", details);
         }
+    }
+    else {
     }
 }
 function onBeforeSendHeaders(details) {
@@ -151,15 +167,18 @@ function onBeforeSendHeaders(details) {
     }
 }
 function onMessage(msg, sender, sendResponse) {
-    if (sender.extensionId != chrome.runtime.id)
-        throw sender;
-    if (msg == "settings") {
-        sendResponse(settings);
+    try {
+        if (msg == "settings") {
+            sendResponse(settings);
+        }
+        else {
+            settings = msg;
+            storage.set(settings);
+            DEBUG && console.debug("update settings", settings);
+        }
     }
-    else {
-        console.debug("update settings", settings);
-        settings = msg;
-        storage.set(settings);
+    catch (e) {
+        error(e);
     }
 }
 chrome.runtime.onMessage.addListener(onMessage);
@@ -183,3 +202,12 @@ chrome.webRequest.onBeforeSendHeaders.addListener(onBeforeSendHeaders, {
     "requestHeaders",
     "blocking"
 ]);
+DEBUG && fetch("https://httpbin.org/headers")
+    .then(res => res.json())
+    .then(headers => {
+    debug("headers %o", headers);
+})
+    .catch(error);
+DEBUG && chrome.webNavigation.onBeforeNavigate.addListener(details => {
+    debug("onBeforeNavigate", details);
+});

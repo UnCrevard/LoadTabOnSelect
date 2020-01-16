@@ -1,7 +1,7 @@
 export { }
 
-//const log = console.log
-//const debug = console.debug
+const DEBUG=false
+const debug = console.debug
 const error = console.error;
 
 
@@ -30,7 +30,9 @@ storage.get(null, (items: Settings) => {
 
 	if (items) {
 
-		settings = Object.assign(settings, items)
+		Object.assign(settings, items)
+
+		DEBUG && debug("settings", settings)
 	}
 })
 
@@ -41,12 +43,20 @@ storage.get(null, (items: Settings) => {
  */
 
 function onStartup() {
+	/*
+	chrome.tabs.query(null,tabs=>
+	{
+		for (let tab of tabs)
+		{
+			debug(tab)
+		}
+	})
+	*/
 }
 
 // Sent to the event page just before the extension is unloaded. This gives the extension an opportunity to do some cleanup.
 
-function onSuspend() {
-}
+function onSuspend() {}
 /*
 
 	chrome : ctrl+r
@@ -54,20 +64,18 @@ function onSuspend() {
 	{previousVersion: "1.x", reason: "update"}
 */
 function onInstalled(details: chrome.runtime.InstalledDetails) {
-	chrome.runtime.openOptionsPage(error)
+	//chrome.runtime.openOptionsPage(error)
 }
 
 // Fired when an update is available, but isn't installed immediately because the extension is currently running.
 
-function onUpdateAvailable(details: chrome.runtime.UpdateAvailableDetails) {
-}
+function onUpdateAvailable(details: chrome.runtime.UpdateAvailableDetails) {}
 
-function onRestartRequired(reason: string) {
-}
+function onRestartRequired(reason: string) {}
 
 function onCreated(tab: chrome.tabs.Tab) {
 
-	// log("onCreated", tab.id, tab.url, tab.favIconUrl)
+	DEBUG && debug("onCreated", tab)
 
 	/* backgrounded tab ? */
 
@@ -76,8 +84,7 @@ function onCreated(tab: chrome.tabs.Tab) {
 		// @chrome : url = url (ctrl bookmark) ou "" (ctrl+link)
 		// @firefox : url = "about:blank"
 
-		tabs[tab.id] =
-			{
+		tabs[tab.id] ={
 				isSleeping: false,
 				title: null,
 				url: null,
@@ -98,7 +105,7 @@ function onUpdated(tabId: number, changeInfo: chrome.tabs.TabChangeInfo, tabInfo
 		}
 		else {
 
-			// log("onUpdated", changeInfo, tab)
+			DEBUG && debug("onUpdated", changeInfo, tab)
 
 			if (changeInfo.url && changeInfo.url != "about:blank") tab.url = changeInfo.url
 			if (changeInfo.title) tab.title = changeInfo.title
@@ -106,9 +113,10 @@ function onUpdated(tabId: number, changeInfo: chrome.tabs.TabChangeInfo, tabInfo
 
 			if (changeInfo.status && changeInfo.status == Status.complete && tab.url) {
 				tab.isSleeping = true
-				tab.stop = false
 
-				let protocol = new URL(tab.url).protocol
+				let url=new URL(tab.url)
+
+				let protocol = url.protocol
 
 				switch (protocol) {
 
@@ -125,7 +133,32 @@ function onUpdated(tabId: number, changeInfo: chrome.tabs.TabChangeInfo, tabInfo
 					case "http:":
 					case "https:":
 
-						if (!settings.prefetching) return
+						/*
+
+						remove tracking from google search
+
+						*/
+
+						if (url.hostname.match("^www.google.[a-z]+$"))
+						{
+							let realURL = url.searchParams.get("url")
+
+							if (realURL)
+							{
+								tab.url = realURL
+							}
+						}
+						/*
+
+						if the page has been visited before,
+						the title is probably set (tab.title!=null)
+
+						*/
+						if (tab.title || !settings.prefetching) return
+
+						tab.stop = false
+
+						DEBUG && debug("prefetching",tab)
 
 						fetch(tab.url, {
 							credentials: "include",
@@ -133,18 +166,20 @@ function onUpdated(tabId: number, changeInfo: chrome.tabs.TabChangeInfo, tabInfo
 						})
 							.then(res => res.text())
 							.then(body => {
-
-								//log("title",body.match(/<title>(.*?)<\/title>/gi))
-								//log("link",body.match(/<link.*?>/gi))
-
-								//tab.stop=true // prevent DOMParser leaks
+/*
+								debug("title",body.match(/<title>(.*?)<\/title>/gi))
+								debug("link",body.match(/<link.*?>/gi))
+*/
+								tab.stop=true // prevent DOMParser leaks
 
 								let html = new DOMParser().parseFromString(body, "text/html")
 
 								// extract title
 
 								let titles = html.querySelectorAll("head title")
-								tab.title = (titles) ? titles[0].textContent : tab.url
+								tab.title = titles.length ? titles[0].textContent : tab.url
+
+								DEBUG && debug("titles",titles)
 
 								// extract favicons
 
@@ -169,6 +204,8 @@ function onUpdated(tabId: number, changeInfo: chrome.tabs.TabChangeInfo, tabInfo
 									}
 								})
 
+								DEBUG && debug("favicons",icons)
+
 								// best quality
 
 								tab.faviconUrl = icons.sort((a, b) => b.size - a.size)[0].href
@@ -176,8 +213,15 @@ function onUpdated(tabId: number, changeInfo: chrome.tabs.TabChangeInfo, tabInfo
 								chrome.tabs.update(tabId, {
 									url: `html/tab.html?data=${encodeURIComponent(JSON.stringify(tab))}`
 								})
+
+								tab.stop=false; // unlock tab for favicon
+
+								DEBUG && debug(tab)
 							})
-							.catch(error)
+							.catch(err=>
+							{
+								error(err)
+							})
 						break;
 
 					default:
@@ -192,7 +236,7 @@ function onActivated(activeInfo: chrome.tabs.TabActiveInfo) {
 
 	if (activeInfo.tabId in tabs) {
 
-		// log("onActivated", activeInfo)
+		DEBUG && debug("onActivated", activeInfo)
 
 		let tab = tabs[activeInfo.tabId]
 
@@ -202,21 +246,6 @@ function onActivated(activeInfo: chrome.tabs.TabActiveInfo) {
 
 		delete tabs[activeInfo.tabId]
 
-		/*
-
-		remove tracking from google search
-
-		*/
-
-		let extract = new URL(url)
-
-		if (extract.hostname.match("^www.google.[a-z]+$")) {
-
-			let realURL = extract.searchParams.get("url")
-
-			if (realURL) url = realURL
-		}
-
 		// 'hashtag char' issue is gone
 
 		chrome.tabs.update({ url: url })
@@ -225,7 +254,7 @@ function onActivated(activeInfo: chrome.tabs.TabActiveInfo) {
 
 function onRemoved(tabId: number, removeInfo: chrome.tabs.TabRemoveInfo) {
 
-	// log("onRemoved", tabId, removeInfo)
+	DEBUG && debug("onRemoved", tabId, removeInfo)
 	/*
 
 	.windowId:number
@@ -239,26 +268,47 @@ function onRemoved(tabId: number, removeInfo: chrome.tabs.TabRemoveInfo) {
 /*
 	block tab loading
 
+	on @chrome onBeforeRequest is fired before onCreated
+
  */
 function onBeforeRequest(details: chrome.webRequest.WebRequestDetails) {
 
 	if (details.tabId < 0) {
 		// from an addon
-		//debug("addon", details)
+		DEBUG && debug("addon bypass", details)
 	}
-	else if (details.tabId in tabs) {
+	else if (details.tabId in tabs) { // from a backgrounded tab
 
 		let tab = tabs[details.tabId]
 
 		if (!tab.url) tab.url = details.url
 
 		if (tab.stop) {
-			//debug("block", details)
+			DEBUG && debug("block", details)
 			return { cancel: true }
 		}
 		else {
-			//debug("allow", details)
+			DEBUG && debug("allow", details)
 		}
+	}
+	else
+	{
+		// from an active tab
+
+		/*
+
+		DEBUG && debug("ignore",details)
+
+		originUrl
+
+		    string. URL de la ressource qui a déclenché la requête. Par exemple, si "https://example.com" contient un lien, et que l'utilisateur clique sur le lien, alors originUrl de la requête résultante est "https://example.com".
+
+		if ((details.originUrl as string).startsWith("moz-extension://"))
+		{
+			debug("ignore", details)
+		}
+
+		*/
 	}
 }
 
@@ -289,26 +339,33 @@ function onBeforeSendHeaders(details: chrome.webRequest.WebRequestHeadersDetails
 	exchange settings with options page
 
  */
+function onMessage(msg: any, sender: chrome.runtime.MessageSender, sendResponse: (response: any) => void) {
+	try {
 
-function onMessage(msg:any,sender:chrome.runtime.MessageSender,sendResponse:(response:any)=>void)
-{
-	if (sender.extensionId!= chrome.runtime.id) throw sender
+		/*
 
-	if (msg=="settings")
-	{
-		sendResponse(settings)
+			id on @chrome
+			extensionId on @firefox
+
+		 */
+
+		if (msg == "settings") {
+			sendResponse(settings)
+		}
+		else {
+
+			settings = msg as Settings
+			storage.set(settings)
+
+			DEBUG && console.debug("update settings", settings)
+		}
 	}
-	else
-	{
-		console.debug("update settings",settings)
-
-		settings=msg as Settings
-		storage.set(settings)
+	catch (e) {
+		error(e)
 	}
 }
 
 chrome.runtime.onMessage.addListener(onMessage)
-
 chrome.runtime.onStartup.addListener(onStartup)
 chrome.runtime.onInstalled.addListener(onInstalled)
 chrome.runtime.onUpdateAvailable.addListener(onUpdateAvailable)
@@ -344,13 +401,34 @@ chrome.webRequest.onBeforeSendHeaders.addListener(onBeforeSendHeaders, {
 	])
 
 
-// check if leaking
-
 /*
-fetch("https://httpbin.org/headers")
+
+	check if there is any leaking in headers
+
+	adblockplus $third-party blocks this
+*/
+
+DEBUG && fetch("https://httpbin.org/headers")
 	.then(res => res.json())
 	.then(headers => {
-		log("%o", headers)
+		debug("headers %o", headers)
 	})
 	.catch(error)
+
+/*
+
+	network monitoring
+
 */
+
+/*
+"onCreatedNavigationTarget" in chrome.webNavigation && chrome.webNavigation.onCreatedNavigationTarget.addListener(details=>
+{
+	debug("onCreatedNavigationTarget",details)
+})
+*/
+
+DEBUG && chrome.webNavigation.onBeforeNavigate.addListener(details=>
+{
+	debug("onBeforeNavigate",details)
+})

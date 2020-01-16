@@ -1,5 +1,10 @@
 ## LoadTabOnSelect Evolution
 
+**20200115 version 1.7**
+
+some fixes & optimizations.
+remove annoying opening from option page for no reason.
+
 **20180728 version 1.6**
 
 now backgrounded tabs network access is blocked (zero data loaded)<br>
