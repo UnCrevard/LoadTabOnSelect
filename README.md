@@ -1,5 +1,9 @@
 ## LoadTabOnSelect Evolution
 
+**20201013 version 1.8**
+
+fix incompatibility with twitter (removing onBeforeSendHeaders)
+
 **20200115 version 1.7**
 
 some fixes & optimizations.

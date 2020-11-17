@@ -1,7 +1,6 @@
-body
-{
-	box-sizing:border-box;
-	font-size:16px;
+body {
+	box-sizing: border-box;
+	font-size: 16px;
 	font-family: sans-serif;
 	display: inline-block;
 }
@@ -10,20 +9,18 @@ body
 	position: fixed;
 	/* or absolute */
 	top: 48%;
-	left:48%;
-	width:4%;
+	left: 48%;
+	width: 4%;
 }
 
 .google {
 	color: red;
 }
 
-.error
-{
-	color:red;
+.error {
+	color: red;
 }
 
-.margin-left
-{
+.margin-left {
 	margin-left: 8px;
 }

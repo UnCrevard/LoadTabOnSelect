@@ -1,0 +1,32 @@
+{
+	"manifest_version": 2,
+	"name": "LoadTabOnSelect Evolution",
+	"version": "1.8",
+	"description": "Load backgrounded tabs on selection.",
+	"browser_specific_settings": {
+		"gecko": {
+			"id": "{18d535b1-dd41-4309-a9a5-f92699430f4f}",
+			"strict_min_version": "60.0"
+		}
+	},
+	"background": {
+		"scripts": [
+			"/js/background.js"
+		]
+	},
+	"icons": {
+		"48": "/img/icon.png",
+		"96": "/img/icon@2x.png"
+	},
+	"options_ui": {
+		"page": "html/options.html"
+	},
+	"permissions": [
+		"tabs",
+		"storage",
+		"webRequest",
+		"webRequestBlocking",
+		"<all_urls>"
+	],
+	"web_accessible_resources": []
+}

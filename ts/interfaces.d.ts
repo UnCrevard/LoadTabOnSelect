@@ -1,20 +1,22 @@
-declare const enum Status{
-	complete="complete",
-	loading="loading"
+declare const enum Status
+{
+	complete = "complete",
+	loading = "loading"
 }
 
-interface Tab {
+interface Tab
+{
 	isSleeping: boolean
 	title: string
 	faviconUrl: string
 	url: string
 	id: number
-	stop:boolean
+	stop: boolean
 }
 
 interface Settings
 {
-	prefetching:boolean
+	prefetching: boolean
 }
 
 /*
@@ -25,7 +27,8 @@ interface HTMLLinkElementX extends HTMLLinkElement {
 
 /* fix */
 
-declare namespace browser.tabs{
+declare namespace browser.tabs
+{
 	/**
 	 * discard (firefox 58)
 	 * @param  {number}       tabId [description]
@@ -34,10 +37,12 @@ declare namespace browser.tabs{
 	function discard(tabId: number): Promise<Tab>;
 }
 
-declare namespace chrome.runtime{
-	function getBrowserInfo(...args:Array<any>):void
+declare namespace chrome.runtime
+{
+	function getBrowserInfo(...args: Array<any>): void
 
-	interface MessageSender{
-		extensionId:string
+	interface MessageSender
+	{
+		extensionId: string
 	}
 }

@@ -3,10 +3,9 @@
     /* Basic Options */
     "target": "esnext",                          /* Specify ECMAScript target version: 'ES3' (default), 'ES5', 'ES2015', 'ES2016', 'ES2017','ES2018' or 'ESNEXT'. */
     "module": "esnext",                     /* Specify module code generation: 'none', 'commonjs', 'amd', 'system', 'umd', 'es2015', or 'ESNext'. */
-    "outDir": "dist/js/",                        /* Redirect output structure to the directory. */
+    "outDir": "../__build/js/",                        /* Redirect output structure to the directory. */
     "removeComments": true,                /* Do not emit comments to output. */
-    "strict": false,
-    "typeRoots": ["node_modules/@types", "node_modules/web-ext-types"]
-  } ,
-  "include":["ts/"]
+    "strict": false
+    // ,"typeRoots": ["node_modules/@types", "node_modules/web-ext-types"]
+  }
 }

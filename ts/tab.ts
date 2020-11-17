@@ -1,4 +1,5 @@
-export {}
+export { }
+
 /*
 
 	basically set the title and the favicon on the page
